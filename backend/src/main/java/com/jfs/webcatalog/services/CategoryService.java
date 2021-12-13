@@ -1,6 +1,7 @@
 package com.jfs.webcatalog.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jfs.webcatalog.dto.CategoryDTO;
 import com.jfs.webcatalog.entities.Category;
 import com.jfs.webcatalog.repositories.CategoryRepository;
+import com.jfs.webcatalog.services.exceptions.EntityNotFoundException;
 
 /*Anotação @Service registra a classe como componente que participa 
 do controle de injeção de dependências do Spring*/
@@ -40,6 +42,13 @@ public class CategoryService {
 		
 		//Recurso Lambda Java:
 		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
-		
 	}
+	
+	@Transactional(readOnly = true)
+	public CategoryDTO findById(Long id) {
+		Optional<Category> obj = repository.findById(id);
+		Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not found"));		
+		return new CategoryDTO(entity);
+	}
+
 }
