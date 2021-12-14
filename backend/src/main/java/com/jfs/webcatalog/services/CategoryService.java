@@ -13,26 +13,18 @@ import com.jfs.webcatalog.entities.Category;
 import com.jfs.webcatalog.repositories.CategoryRepository;
 import com.jfs.webcatalog.services.exceptions.EntityNotFoundException;
 
-/*Anotação @Service registra a classe como componente que participa 
-do controle de injeção de dependências do Spring*/
-
 @Service
 public class CategoryService {
 
-	/*
-	 * Anotação para injetar dependência válida do Repository
-	 */
 	@Autowired
 	private CategoryRepository repository;
 
-	/*
-	 * Transação de apenas leitura, não é necessário locking no banco.
-	 */
+
 	@Transactional(readOnly = true)
 	public List<CategoryDTO> findAll() {
 		List<Category> list = repository.findAll();
 		
-		/* Forma alternativa
+		/* Alternative method
 		List<CategoryDTO> listDto = new ArrayList<>();
 		for (Category cat : list) {
 			listDto.add(new CategoryDTO(cat));
@@ -40,7 +32,7 @@ public class CategoryService {
 		return listDto;
 		*/
 		
-		//Recurso Lambda Java:
+		//Lambda resource:
 		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
 	}
 	
@@ -48,6 +40,14 @@ public class CategoryService {
 	public CategoryDTO findById(Long id) {
 		Optional<Category> obj = repository.findById(id);
 		Category entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not found"));		
+		return new CategoryDTO(entity);
+	}
+
+	@Transactional
+	public CategoryDTO insert(CategoryDTO dto) {
+		Category entity = new Category();
+		entity.setName(dto.getName());
+		entity = repository.save(entity);
 		return new CategoryDTO(entity);
 	}
 
